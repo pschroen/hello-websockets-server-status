@@ -14,7 +14,7 @@ const exec = promisify(child_process.exec);
 let osRelease;
 let numProcessingUnits;
 let serverUptime;
-let serverLoadPercentage;
+let normalizedLoadAverage;
 
 try {
 	osRelease = (await exec('cat /etc/issue')).stdout;
@@ -57,9 +57,9 @@ async function getStatus() {
 	}
 
 	try {
-		serverLoadPercentage = (await exec('cat /proc/loadavg')).stdout;
-		serverLoadPercentage = (Number(serverLoadPercentage.split(' ')[0]) / numProcessingUnits) * 100;
-		serverLoadPercentage = Math.round((serverLoadPercentage + Number.EPSILON) * 100) / 100;
+		normalizedLoadAverage = (await exec('cat /proc/loadavg')).stdout;
+		normalizedLoadAverage = Number(normalizedLoadAverage.split(' ')[0]) / numProcessingUnits;
+		normalizedLoadAverage = Math.round((normalizedLoadAverage + Number.EPSILON) * 100) / 100;
 	} catch (err) {
 		console.warn(err.stderr);
 	}
@@ -69,7 +69,7 @@ async function getStatus() {
 		currentTime,
 		restartTime: currentTime - serverUptime,
 		serverUptime,
-		serverLoadPercentage,
+		normalizedLoadAverage,
 		numProcessingUnits
 	};
 
