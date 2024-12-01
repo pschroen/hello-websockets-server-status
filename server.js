@@ -47,11 +47,11 @@ async function getStatus() {
 		return;
 	}
 
-	const currentTime = Date.now();
+	const currentTime = Math.floor(Date.now() / 1000); // seconds
 
 	try {
 		serverUptime = (await exec('cat /proc/uptime')).stdout;
-		serverUptime = Number(serverUptime.split(' ')[0]) * 1000; // milliseconds
+		serverUptime = Number(serverUptime.split(' ')[0]);
 	} catch (err) {
 		console.warn(err.stderr);
 	}
