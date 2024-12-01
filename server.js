@@ -40,6 +40,13 @@ app.use(express.static('public'));
 
 //
 
+import db from './sqlite.js';
+
+await db.ready();
+console.log(await db.getAll());
+
+//
+
 const clients = [];
 
 async function getStatus() {
@@ -74,6 +81,9 @@ async function getStatus() {
 	};
 
 	// console.log('STATUS:', data);
+
+	// Store integers for time, uptime, and load average as percentage
+	await db.addStatus([currentTime, serverUptime, normalizedLoadAverage * 100]);
 
 	return data;
 }

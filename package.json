@@ -8,6 +8,7 @@
     "glitch",
     "express",
     "websockets",
+    "sqlite",
     "server",
     "status"
   ],
@@ -27,6 +28,8 @@
   },
   "dependencies": {
     "express": "latest",
-    "express-ws": "latest"
+    "express-ws": "latest",
+    "sqlite": "latest",
+    "sqlite3": "latest"
   }
 }
