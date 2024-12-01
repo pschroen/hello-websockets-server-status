@@ -1,0 +1,30 @@
+{
+  "name": "hello-server-status",
+  "version": "0.0.1",
+  "description": "A simple status API endpoint built on Express, like the Apache status page.",
+  "homepage": "https://hello-server-status.glitch.me/server-status",
+  "keywords": [
+    "node",
+    "glitch",
+    "express",
+    "server",
+    "status"
+  ],
+  "author": "pschroen",
+  "private": true,
+  "repository": {
+    "url": "https://glitch.com/edit/#!/hello-server-status"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": "16.x"
+  },
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "latest"
+  }
+}
