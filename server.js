@@ -81,7 +81,6 @@ async function getStatus() {
 function add(ws, subscription) {
 	clients.push(ws);
 
-	ws._idle = Date.now();
 	ws._subscription = subscription;
 }
 
@@ -106,29 +105,12 @@ async function status() {
 	}
 }
 
-function idle() {
-	const idleTime = Date.now() - 1800000; // 30 * 60 * 1000
-
-	for (let i = 0, l = clients.length; i < l; i++) {
-		const client = clients[i];
-
-		if (client._idle === 0) {
-			client._idle = Date.now();
-		} else if (client._idle < idleTime) {
-			client.terminate();
-			console.log('IDLE:', i);
-		}
-	}
-}
-
 app.ws('/', (ws, request) => {
 	ws.on('close', () => {
 		remove(ws);
 	});
 
 	ws.on('message', data => {
-		ws._idle = 0;
-
 		data = JSON.parse(data);
 
 		switch (data.event) {
@@ -153,7 +135,6 @@ let timeout = null;
 async function onUpdate() {
 	startTime = performance.now();
 
-	idle();
 	await status();
 
 	if (timeout !== null) {
