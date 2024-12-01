@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="description" content="A cool thing made with Glitch">
+
+	<title>Welcome to Glitch!</title>
+
+	<link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+
+	<style>
+		body {
+			font-family: sans-serif;
+			margin: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		const socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}`);
+
+		socket.addEventListener('open', () => {
+			const event = 'subscribe';
+			const message = {
+				subscription: 'server-status'
+			};
+
+			console.log('send', event, message);
+			socket.send(JSON.stringify({ event, message }));
+		});
+
+		socket.addEventListener('message', ({ data }) => {
+			data = JSON.parse(data);
+			console.log('message', data.event, data.message);
+
+			switch (data.event) {
+				case 'server-status': {
+					const {
+						serverVersion,
+						currentTime,
+						restartTime,
+						serverUptime,
+						serverLoadPercentage,
+						numProcessingUnits
+					} = data.message;
+
+					break;
+				}
+			}
+		});
+	</script>
+</body>
+</html>

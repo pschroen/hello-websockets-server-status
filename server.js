@@ -2,9 +2,11 @@
  * @author pschroen / https://ufo.ai/
  *
  * Remix of https://glitch.com/edit/#!/hello-express
+ * Remix of https://glitch.com/edit/#!/multiuser-sketchpad
  */
 
 import express from 'express';
+import enableWs from 'express-ws';
 import { promisify } from 'util';
 import child_process from 'child_process';
 const exec = promisify(child_process.exec);
@@ -28,11 +30,23 @@ try {
 	console.warn(err.stderr);
 }
 
+const interval = 4000; // 4 second heartbeat
+
 const app = express();
+const expressWs = enableWs(app);
+expressWs.getWss('/');
+
+app.use(express.static('public'));
 
 //
 
-app.get('/server-status', async (req, res) => {
+const clients = [];
+
+async function getStatus() {
+	if (!clients.length) {
+		return;
+	}
+
 	const currentTime = Date.now();
 
 	try {
@@ -50,15 +64,110 @@ app.get('/server-status', async (req, res) => {
 		console.warn(err.stderr);
 	}
 
-	res.json({
+	const data = {
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		currentTime,
 		restartTime: currentTime - serverUptime,
 		serverUptime,
 		serverLoadPercentage,
 		numProcessingUnits
+	};
+
+	// console.log('STATUS:', data);
+
+	return data;
+}
+
+function add(ws, subscription) {
+	clients.push(ws);
+
+	ws._idle = Date.now();
+	ws._subscription = subscription;
+}
+
+function remove(ws) {
+	const index = clients.indexOf(ws);
+
+	if (~index) {
+		clients.splice(index, 1);
+	}
+}
+
+async function status() {
+	const event = 'server-status';
+	const message = await getStatus();
+
+	for (let i = 0, l = clients.length; i < l; i++) {
+		const client = clients[i];
+
+		if (client._subscription === event && client.readyState === client.OPEN) {
+			client.send(JSON.stringify({ event, message }));
+		}
+	}
+}
+
+function idle() {
+	const idleTime = Date.now() - 1800000; // 30 * 60 * 1000
+
+	for (let i = 0, l = clients.length; i < l; i++) {
+		const client = clients[i];
+
+		if (client._idle === 0) {
+			client._idle = Date.now();
+		} else if (client._idle < idleTime) {
+			client.terminate();
+			console.log('IDLE:', i);
+		}
+	}
+}
+
+app.ws('/', (ws, request) => {
+	ws.on('close', () => {
+		remove(ws);
+	});
+
+	ws.on('message', data => {
+		ws._idle = 0;
+
+		data = JSON.parse(data);
+
+		switch (data.event) {
+			case 'subscribe': {
+				const { subscription } = data.message;
+				// console.log('SUBSCRIBE:', subscription);
+
+				add(ws, subscription);
+				break;
+			}
+		}
 	});
 });
+
+//
+
+import { performance } from 'perf_hooks';
+
+let startTime = 0;
+let timeout = null;
+
+async function onUpdate() {
+	startTime = performance.now();
+
+	idle();
+	await status();
+
+	if (timeout !== null) {
+		timeout = setTimeout(onUpdate, Math.max(0, interval - (performance.now() - startTime)));
+	}
+}
+
+// Start
+startTime = 0;
+timeout = setTimeout(onUpdate, 0);
+
+// Stop
+// clearTimeout(timeout);
+// timeout = null;
 
 //
 

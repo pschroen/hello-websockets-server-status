@@ -1,19 +1,20 @@
 {
-  "name": "hello-server-status",
+  "name": "hello-websockets-server-status",
   "version": "0.0.1",
   "description": "A simple status API endpoint built on Express, like the Apache status page.",
-  "homepage": "https://hello-server-status.glitch.me/server-status",
+  "homepage": "https://hello-websockets-server-status.glitch.me/",
   "keywords": [
     "node",
     "glitch",
     "express",
+    "websockets",
     "server",
     "status"
   ],
   "author": "pschroen",
   "private": true,
   "repository": {
-    "url": "https://glitch.com/edit/#!/hello-server-status"
+    "url": "https://glitch.com/edit/#!/hello-websockets-server-status"
   },
   "license": "ISC",
   "engines": {
@@ -25,6 +26,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "latest"
+    "express": "latest",
+    "express-ws": "latest"
   }
 }
