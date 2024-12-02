@@ -52,7 +52,7 @@ console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
 const clients = [];
 
 async function getAll(time) {
-	// const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
+	// const pastDaySeconds = Math.floor(Date.now() / 1000) - 86400; // 24 x 60 x 60
 
 	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {
 		return [
