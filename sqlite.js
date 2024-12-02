@@ -37,9 +37,9 @@ open({
 });
 
 export default {
-	getAll: async () => {
+	getAll: async time => {
 		try {
-			return await db.all('SELECT * from Status');
+			return await db.all('SELECT * from Status WHERE time >= ?', time);
 		} catch (err) {
 			console.error(err);
 		}

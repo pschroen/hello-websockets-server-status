@@ -43,7 +43,10 @@ app.use(express.static('public'));
 import db from './sqlite.js';
 
 await db.ready();
-console.log(await db.getAll());
+
+const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
+
+console.log(twoDaysSeconds, await db.getAll(twoDaysSeconds));
 
 //
 
