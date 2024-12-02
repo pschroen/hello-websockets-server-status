@@ -44,16 +44,17 @@ import db from './sqlite.js';
 
 await db.ready();
 
-console.log(await getAll());
+// Get the last ~20 status records (4 seconds x 20) = 80
+console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
 
 //
 
 const clients = [];
 
-async function getAll() {
-	const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
+async function getAll(time) {
+	// const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
 
-	const data = (await db.getAll(twoDaysSeconds)).map(({ time, uptime, loadavg }) => {
+	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {
 		return [
 			time,
 			uptime,
