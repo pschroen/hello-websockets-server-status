@@ -44,6 +44,7 @@ import db from './sqlite.js';
 
 await db.ready();
 
+// 1440 minutes in a day (24 x 60) / 4 second interval = 360
 console.log(await getAll());
 
 //
