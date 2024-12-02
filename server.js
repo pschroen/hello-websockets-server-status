@@ -50,10 +50,6 @@ console.log(await db.getAll());
 const clients = [];
 
 async function getStatus() {
-	if (!clients.length) {
-		return;
-	}
-
 	const currentTime = Math.floor(Date.now() / 1000); // seconds
 
 	try {
