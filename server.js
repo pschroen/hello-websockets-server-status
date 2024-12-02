@@ -44,13 +44,27 @@ import db from './sqlite.js';
 
 await db.ready();
 
-const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
-
-console.log(twoDaysSeconds, await db.getAll(twoDaysSeconds));
+console.log(await getAll());
 
 //
 
 const clients = [];
+
+async function getAll() {
+	const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
+
+	const data = (await db.getAll(twoDaysSeconds)).map(data => {
+		return {
+			currentTime: data.time,
+			serverUptime: data.uptime,
+			normalizedLoadAverage: data.loadavg / 100 // Convert back to normalized load average in 0 to 1 range
+		};
+	});
+
+	// console.log('ALL:', twoDaysSeconds, data);
+
+	return data;
+}
 
 async function getStatus() {
 	const currentTime = Math.floor(Date.now() / 1000); // seconds
@@ -64,7 +78,7 @@ async function getStatus() {
 
 	try {
 		normalizedLoadAverage = (await exec('cat /proc/loadavg')).stdout;
-		normalizedLoadAverage = Number(normalizedLoadAverage.split(' ')[0]) / numProcessingUnits;
+		normalizedLoadAverage = Number(normalizedLoadAverage.split(' ')[0]) / numProcessingUnits; // 0 to 1 range
 		normalizedLoadAverage = Math.round((normalizedLoadAverage + Number.EPSILON) * 100) / 100;
 	} catch (err) {
 		console.warn(err.stderr);
