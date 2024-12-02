@@ -54,11 +54,11 @@ async function getAll() {
 	const twoDaysSeconds = Math.floor(Date.now() / 1000) - 172800; // 48 * 60 * 60
 
 	const data = (await db.getAll(twoDaysSeconds)).map(data => {
-		return {
-			currentTime: data.time,
-			serverUptime: data.uptime,
-			normalizedLoadAverage: data.loadavg / 100 // Convert back to normalized load average in 0 to 1 range
-		};
+		return [
+			data.time,
+			data.uptime,
+			data.loadavg / 100 // Convert back to normalized load average in 0 to 1 range
+		];
 	});
 
 	// console.log('ALL:', twoDaysSeconds, data);
