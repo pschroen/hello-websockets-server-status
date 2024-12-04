@@ -39,7 +39,7 @@
 			console.log('message', data.event, data.message);
 
 			switch (data.event) {
-				case 'server-status': {
+				case 'server-details': {
 					const {
 						serverVersion,
 						currentTime,
@@ -51,6 +51,8 @@
 
 					break;
 				}
+				case 'server-status':
+					break;
 			}
 		});
 	</script>
