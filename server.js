@@ -83,6 +83,34 @@ async function getStatus() {
 		console.warn(err.stderr);
 	}
 
+	const data = [currentTime, serverUptime, normalizedLoadAverage];
+
+	// console.log('STATUS:', data);
+
+	// Store integers for time, uptime, and load average as percentage
+	await db.addStatus([currentTime, serverUptime, normalizedLoadAverage * 100]);
+
+	return data;
+}
+
+async function getDetails() {
+	const currentTime = Math.floor(Date.now() / 1000); // seconds
+
+	try {
+		serverUptime = (await exec('cat /proc/uptime')).stdout;
+		serverUptime = Number(serverUptime.split(' ')[0]);
+	} catch (err) {
+		console.warn(err.stderr);
+	}
+
+	try {
+		normalizedLoadAverage = (await exec('cat /proc/loadavg')).stdout;
+		normalizedLoadAverage = Number(normalizedLoadAverage.split(' ')[0]) / numProcessingUnits; // 0 to 1 range
+		normalizedLoadAverage = Math.round((normalizedLoadAverage + Number.EPSILON) * 100) / 100;
+	} catch (err) {
+		console.warn(err.stderr);
+	}
+
 	const data = {
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		currentTime,
@@ -92,10 +120,7 @@ async function getStatus() {
 		numProcessingUnits
 	};
 
-	// console.log('STATUS:', data);
-
-	// Store integers for time, uptime, and load average as percentage
-	await db.addStatus([currentTime, serverUptime, normalizedLoadAverage * 100]);
+	// console.log('DETAILS:', data);
 
 	return data;
 }
@@ -127,7 +152,7 @@ async function status() {
 	}
 }
 
-app.ws('/', (ws, request) => {
+app.ws('/', async (ws, request) => {
 	ws.on('close', () => {
 		remove(ws);
 	});
@@ -155,6 +180,11 @@ app.ws('/', (ws, request) => {
 			}
 		}
 	});
+
+	const event = 'server-details';
+	const message = await getDetails();
+
+	ws.send(JSON.stringify({ event, message }));
 });
 
 //
