@@ -24,7 +24,10 @@
 		socket.addEventListener('open', () => {
 			const event = 'subscribe';
 			const message = {
-				subscription: 'server-status'
+				subscription: {
+					name: 'server-status',
+					time: 86400 // Past day in seconds (24 x 60 x 60)
+				}
 			};
 
 			console.log('send', event, message);
