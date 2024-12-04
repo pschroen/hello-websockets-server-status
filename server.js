@@ -52,8 +52,6 @@ console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
 const clients = [];
 
 async function getAll(time) {
-	// const pastDaySeconds = Math.floor(Date.now() / 1000) - 86400; // 24 x 60 x 60
-
 	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {
 		return [
 			time,
@@ -134,7 +132,7 @@ app.ws('/', (ws, request) => {
 		remove(ws);
 	});
 
-	ws.on('message', data => {
+	ws.on('message', async data => {
 		data = JSON.parse(data);
 
 		switch (data.event) {
@@ -142,7 +140,17 @@ app.ws('/', (ws, request) => {
 				const { subscription } = data.message;
 				// console.log('SUBSCRIBE:', subscription);
 
-				add(ws, subscription);
+				add(ws, subscription.name);
+
+				switch (subscription.name) {
+					case 'server-status': {
+						const event = 'server-status';
+						const message = await getAll(Math.floor(Date.now() / 1000) - subscription.time);
+
+						ws.send(JSON.stringify({ event, message }));
+						break;
+					}
+				}
 				break;
 			}
 		}
