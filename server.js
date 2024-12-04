@@ -56,7 +56,7 @@ async function getAll(time) {
 		return [
 			time,
 			uptime,
-			loadavg / 100 // Convert back to normalized load average in 0 to 1 range
+			loadavg !== null ? loadavg / 100 : null // Convert back to normalized load average in 0 to 1 range
 		];
 	});
 
