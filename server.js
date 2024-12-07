@@ -14,6 +14,7 @@ let osRelease;
 let processorName;
 let numProcessingUnits;
 let memTotal;
+let memAvailable;
 let ipinfo;
 let serverUptime;
 let normalizedLoadAverage;
@@ -46,6 +47,13 @@ try {
 }
 
 try {
+	memAvailable = (await exec('sed -n "/^MemAvailable:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
+	memAvailable = Number(memAvailable) / 1024 / 1024;
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
 	ipinfo = (await exec('curl https://ipinfo.io/')).stdout;
 	ipinfo = JSON.parse(ipinfo);
 } catch (err) {
@@ -60,7 +68,8 @@ async function getDetails() {
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		processorName,
 		numProcessingUnits,
-		memTotal
+		memTotal,
+		memAvailable
 	};
 
 	// console.log('DETAILS:', data);
