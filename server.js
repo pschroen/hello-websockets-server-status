@@ -15,6 +15,8 @@ let processorName;
 let numProcessingUnits;
 let memTotal;
 let memAvailable;
+let swapTotal;
+let swapFree;
 let ipinfo;
 let serverUptime;
 let normalizedLoadAverage;
@@ -54,6 +56,20 @@ try {
 }
 
 try {
+	swapTotal = (await exec('sed -n "/^SwapTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
+	swapTotal = Number(swapTotal) / 1024 / 1024;
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
+	swapFree = (await exec('sed -n "/^SwapFree:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
+	swapFree = Number(swapFree) / 1024 / 1024;
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
 	ipinfo = (await exec('curl https://ipinfo.io/')).stdout;
 	ipinfo = JSON.parse(ipinfo);
 } catch (err) {
@@ -69,7 +85,9 @@ async function getDetails() {
 		processorName,
 		numProcessingUnits,
 		memTotal,
-		memAvailable
+		memAvailable,
+		swapTotal,
+		swapFree
 	};
 
 	// console.log('DETAILS:', data);
