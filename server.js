@@ -46,6 +46,7 @@ try {
 try {
 	memTotal = (await exec('sed -n "/^MemTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
 	memTotal = Number(memTotal) / 1024 / 1024;
+	memTotal = Math.round((memTotal + Number.EPSILON) * 100) / 100;
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -53,6 +54,7 @@ try {
 try {
 	memAvailable = (await exec('sed -n "/^MemAvailable:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
 	memAvailable = Number(memAvailable) / 1024 / 1024;
+	memAvailable = Math.round((memAvailable + Number.EPSILON) * 100) / 100;
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -60,6 +62,7 @@ try {
 try {
 	swapTotal = (await exec('sed -n "/^SwapTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
 	swapTotal = Number(swapTotal) / 1024 / 1024;
+	swapTotal = Math.round((swapTotal + Number.EPSILON) * 100) / 100;
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -67,6 +70,7 @@ try {
 try {
 	swapFree = (await exec('sed -n "/^SwapFree:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
 	swapFree = Number(swapFree) / 1024 / 1024;
+	swapFree = Math.round((swapFree + Number.EPSILON) * 100) / 100;
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -75,7 +79,9 @@ try {
 	let storage = (await exec('df . | tail -1 | tr -s " " | cut -d " " -f 2,4')).stdout;
 	storage = storage.split(' ');
 	storageTotal = Number(storage[0]) / 1024 / 1024;
+	storageTotal = Math.round((storageTotal + Number.EPSILON) * 100) / 100;
 	storageAvailable = Number(storage[1]) / 1024 / 1024;
+	storageAvailable = Math.round((storageAvailable + Number.EPSILON) * 100) / 100;
 } catch (err) {
 	console.warn(err.stderr);
 }
