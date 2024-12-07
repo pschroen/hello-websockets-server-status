@@ -46,32 +46,28 @@ try {
 
 try {
 	memTotal = (await exec('sed -n "/^MemTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	memTotal = Number(memTotal) / 1024 / 1024;
-	memTotal = Math.round((memTotal + Number.EPSILON) * 100) / 100;
+	memTotal = Number(memTotal) * 1024;
 } catch (err) {
 	console.warn(err.stderr);
 }
 
 try {
 	memAvailable = (await exec('sed -n "/^MemAvailable:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	memAvailable = Number(memAvailable) / 1024 / 1024;
-	memAvailable = Math.round((memAvailable + Number.EPSILON) * 100) / 100;
+	memAvailable = Number(memAvailable) * 1024;
 } catch (err) {
 	console.warn(err.stderr);
 }
 
 try {
 	swapTotal = (await exec('sed -n "/^SwapTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	swapTotal = Number(swapTotal) / 1024 / 1024;
-	swapTotal = Math.round((swapTotal + Number.EPSILON) * 100) / 100;
+	swapTotal = Number(swapTotal) * 1024;
 } catch (err) {
 	console.warn(err.stderr);
 }
 
 try {
 	swapFree = (await exec('sed -n "/^SwapFree:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	swapFree = Number(swapFree) / 1024 / 1024;
-	swapFree = Math.round((swapFree + Number.EPSILON) * 100) / 100;
+	swapFree = Number(swapFree) * 1024;
 } catch (err) {
 	console.warn(err.stderr);
 }
