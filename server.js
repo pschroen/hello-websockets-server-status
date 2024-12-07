@@ -28,6 +28,29 @@ try {
 	console.warn(err.stderr);
 }
 
+async function getDetails() {
+	const data = {
+		serverVersion: `Node/${process.versions.node} (${osRelease})`,
+		numProcessingUnits
+	};
+
+	// console.log('DETAILS:', data);
+
+	return data;
+}
+
+const serverDetails = await getDetails();
+
+//
+
+import db from './sqlite.js';
+
+await db.ready();
+
+// 1440 minutes in a day (24 x 60) / 4 second interval = 360
+// Get the last ~20 status records (4 seconds x 20) = 80
+console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
+
 //
 
 import express from 'express';
@@ -40,16 +63,6 @@ const expressWs = enableWs(app);
 expressWs.getWss('/');
 
 app.use(express.static('public'));
-
-//
-
-import db from './sqlite.js';
-
-await db.ready();
-
-// 1440 minutes in a day (24 x 60) / 4 second interval = 360
-// Get the last ~20 status records (4 seconds x 20) = 80
-console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
 
 //
 
@@ -93,38 +106,6 @@ async function getStatus() {
 
 	// Store integers for time, uptime, and load average as percentage
 	await db.addStatus([currentTime, serverUptime, normalizedLoadAverage * 100]);
-
-	return data;
-}
-
-async function getDetails() {
-	const currentTime = Math.floor(Date.now() / 1000); // seconds
-
-	try {
-		serverUptime = (await exec('cat /proc/uptime')).stdout;
-		serverUptime = Number(serverUptime.split(' ')[0]);
-	} catch (err) {
-		console.warn(err.stderr);
-	}
-
-	try {
-		normalizedLoadAverage = (await exec('cat /proc/loadavg')).stdout;
-		normalizedLoadAverage = Number(normalizedLoadAverage.split(' ')[0]) / numProcessingUnits; // 0 to 1 range
-		normalizedLoadAverage = Math.round((normalizedLoadAverage + Number.EPSILON) * 100) / 100;
-	} catch (err) {
-		console.warn(err.stderr);
-	}
-
-	const data = {
-		serverVersion: `Node/${process.versions.node} (${osRelease})`,
-		currentTime,
-		restartTime: currentTime - serverUptime,
-		serverUptime,
-		normalizedLoadAverage,
-		numProcessingUnits
-	};
-
-	// console.log('DETAILS:', data);
 
 	return data;
 }
@@ -198,7 +179,7 @@ app.ws('/', async (ws, request) => {
 	});
 
 	const event = 'server-details';
-	const message = await getDetails();
+	const message = serverDetails;
 
 	ws.send(JSON.stringify({ event, message }));
 
