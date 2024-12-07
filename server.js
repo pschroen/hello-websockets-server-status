@@ -11,6 +11,7 @@ import child_process from 'node:child_process';
 const exec = promisify(child_process.exec);
 
 let osRelease;
+let processorName;
 let numProcessingUnits;
 let ipinfo;
 let serverUptime;
@@ -19,6 +20,12 @@ let normalizedLoadAverage;
 try {
 	osRelease = (await exec('cat /etc/issue')).stdout;
 	osRelease = osRelease.split(' ')[0];
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
+	processorName = (await exec('lscpu | sed -nr "/Model name/ s/.*:\\s*(.*)/\\1/p"')).stdout;
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -43,6 +50,7 @@ async function getDetails() {
 		serverName: `${config.name}.glitch.me`,
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
+		processorName,
 		numProcessingUnits
 	};
 
