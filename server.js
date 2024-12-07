@@ -5,10 +5,8 @@
  * Remix of https://glitch.com/edit/#!/multiuser-sketchpad
  */
 
-import express from 'express';
-import enableWs from 'express-ws';
-import { promisify } from 'util';
-import child_process from 'child_process';
+import { promisify } from 'node:util';
+import child_process from 'node:child_process';
 const exec = promisify(child_process.exec);
 
 let osRelease;
@@ -29,6 +27,11 @@ try {
 } catch (err) {
 	console.warn(err.stderr);
 }
+
+//
+
+import express from 'express';
+import enableWs from 'express-ws';
 
 const interval = 4000; // 4 second heartbeat
 
@@ -214,7 +217,7 @@ app.ws('/', async (ws, request) => {
 
 //
 
-import { performance } from 'perf_hooks';
+import { performance } from 'node:perf_hooks';
 
 let startTime = 0;
 let timeout = null;
