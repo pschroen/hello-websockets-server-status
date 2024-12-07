@@ -76,12 +76,10 @@ try {
 }
 
 try {
-	let storage = (await exec('df . | tail -1 | tr -s " " | cut -d " " -f 2,4')).stdout;
+	let storage = (await exec('df -B1 . | tail -1 | tr -s " " | cut -d " " -f 2,4')).stdout;
 	storage = storage.split(' ');
-	storageTotal = Number(storage[0]) / 1024 / 1024;
-	storageTotal = Math.round((storageTotal + Number.EPSILON) * 100) / 100;
-	storageAvailable = Number(storage[1]) / 1024 / 1024;
-	storageAvailable = Math.round((storageAvailable + Number.EPSILON) * 100) / 100;
+	storageTotal = Number(storage[0]);
+	storageAvailable = Number(storage[1]);
 } catch (err) {
 	console.warn(err.stderr);
 }
