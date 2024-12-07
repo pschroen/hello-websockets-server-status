@@ -5,6 +5,7 @@
  * Remix of https://glitch.com/edit/#!/multiuser-sketchpad
  */
 
+import config from './package.json' with { type: 'json' };
 import { promisify } from 'node:util';
 import child_process from 'node:child_process';
 const exec = promisify(child_process.exec);
@@ -30,6 +31,7 @@ try {
 
 async function getDetails() {
 	const data = {
+		projectName: config.name,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		numProcessingUnits
 	};
@@ -40,6 +42,7 @@ async function getDetails() {
 }
 
 const serverDetails = await getDetails();
+console.log(serverDetails);
 
 //
 
