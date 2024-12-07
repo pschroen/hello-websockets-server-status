@@ -19,6 +19,8 @@
 </head>
 <body>
 	<script>
+		const latencyArray = []; // Used for calculating the average
+
 		const socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}`);
 
 		socket.addEventListener('open', () => {
@@ -58,6 +60,14 @@
 					const { status, latency } = message;
 					const [currentTime, serverUptime, normalizedLoadAverage] = status;
 
+					if (latency) {
+						latencyArray.push(latency);
+
+						// https://stackoverflow.com/questions/10359907/how-to-compute-the-sum-and-average-of-elements-in-an-array/10624256#10624256
+						const avg = latencyArray.reduce((a, b) => a + b, 0) / latencyArray.length;
+
+						console.log('server-status', latencyArray, avg);
+					}
 					break;
 				}
 			}
