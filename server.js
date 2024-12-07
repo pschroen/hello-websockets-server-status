@@ -12,6 +12,7 @@ const exec = promisify(child_process.exec);
 
 let osRelease;
 let numProcessingUnits;
+let ipinfo;
 let serverUptime;
 let normalizedLoadAverage;
 
@@ -29,10 +30,18 @@ try {
 	console.warn(err.stderr);
 }
 
+try {
+	ipinfo = (await exec('curl https://ipinfo.io/')).stdout;
+	ipinfo = JSON.parse(ipinfo);
+} catch (err) {
+	console.warn(err.stderr);
+}
+
 async function getDetails() {
 	const data = {
 		projectName: config.name,
 		serverName: `${config.name}.glitch.me`,
+		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		numProcessingUnits
 	};
