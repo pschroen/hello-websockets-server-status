@@ -32,6 +32,7 @@ try {
 async function getDetails() {
 	const data = {
 		projectName: config.name,
+		serverName: `${config.name}.glitch.me`,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		numProcessingUnits
 	};
