@@ -13,6 +13,7 @@ const exec = promisify(child_process.exec);
 let osRelease;
 let processorName;
 let numProcessingUnits;
+let memTotal;
 let ipinfo;
 let serverUptime;
 let normalizedLoadAverage;
@@ -38,6 +39,13 @@ try {
 }
 
 try {
+	memTotal = (await exec('sed -n "/^MemTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
+	memTotal = Number(memTotal) / 1024 / 1024;
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
 	ipinfo = (await exec('curl https://ipinfo.io/')).stdout;
 	ipinfo = JSON.parse(ipinfo);
 } catch (err) {
@@ -51,7 +59,8 @@ async function getDetails() {
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		processorName,
-		numProcessingUnits
+		numProcessingUnits,
+		memTotal
 	};
 
 	// console.log('DETAILS:', data);
