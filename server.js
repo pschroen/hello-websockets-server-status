@@ -86,7 +86,6 @@ try {
 	console.warn(err.stderr);
 }
 
-console.log(process.env);
 async function getDetails() {
 	const data = {
 		// packageVersion: `${process.env.npm_package_name}/${process.env.npm_package_version}`,
