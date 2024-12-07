@@ -129,6 +129,7 @@ function add(ws, subscription) {
 	clients.push(ws);
 
 	ws._subscription = subscription;
+	ws._latency;
 }
 
 function remove(ws) {
@@ -141,12 +142,16 @@ function remove(ws) {
 
 async function status() {
 	const event = 'server-status';
-	const message = await getStatus();
+	const message = {
+		status: await getStatus()
+	};
 
 	for (let i = 0, l = clients.length; i < l; i++) {
 		const client = clients[i];
 
 		if (client._subscription === event && client.readyState === client.OPEN) {
+			message.latency = client._latency;
+
 			client.send(JSON.stringify({ event, message }));
 		}
 	}
@@ -158,11 +163,15 @@ app.ws('/', async (ws, request) => {
 	});
 
 	ws.on('message', async data => {
-		data = JSON.parse(data);
+		const { event, message } = JSON.parse(data);
 
-		switch (data.event) {
+		switch (event) {
+			case 'heartbeat':
+				// console.log('HEARTBEAT:', message);
+				ws._latency = Date.now() - message;
+				break;
 			case 'subscribe': {
-				const { subscription } = data.message;
+				const { subscription } = message;
 				// console.log('SUBSCRIBE:', subscription);
 
 				add(ws, subscription.name);
@@ -170,7 +179,10 @@ app.ws('/', async (ws, request) => {
 				switch (subscription.name) {
 					case 'server-status': {
 						const event = 'server-status';
-						const message = await getAll(Math.floor(Date.now() / 1000) - subscription.time);
+						const message = {
+							status: await getAll(Math.floor(Date.now() / 1000) - subscription.time),
+							latency: ws._latency
+						};
 
 						ws.send(JSON.stringify({ event, message }));
 						break;
@@ -185,6 +197,19 @@ app.ws('/', async (ws, request) => {
 	const message = await getDetails();
 
 	ws.send(JSON.stringify({ event, message }));
+
+	const heartbeat = () => {
+		if (ws.readyState === ws.OPEN) {
+			const event = 'heartbeat';
+			const message = Date.now();
+
+			ws.send(JSON.stringify({ event, message }));
+
+			setTimeout(heartbeat, interval);
+		}
+	};
+
+	heartbeat();
 });
 
 //

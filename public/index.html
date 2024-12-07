@@ -35,10 +35,13 @@
 		});
 
 		socket.addEventListener('message', ({ data }) => {
-			data = JSON.parse(data);
-			console.log('message', data.event, data.message);
+			const { event, message } = JSON.parse(data);
+			console.log('message', event, message);
 
-			switch (data.event) {
+			switch (event) {
+				case 'heartbeat':
+					socket.send(data);
+					break;
 				case 'server-details': {
 					const {
 						serverVersion,
@@ -47,12 +50,16 @@
 						serverUptime,
 						normalizedLoadAverage,
 						numProcessingUnits
-					} = data.message;
+					} = message;
 
 					break;
 				}
-				case 'server-status':
+				case 'server-status': {
+					const { status, latency } = message;
+					const [currentTime, serverUptime, normalizedLoadAverage] = status;
+
 					break;
+				}
 			}
 		});
 	</script>
