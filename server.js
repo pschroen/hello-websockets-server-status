@@ -6,7 +6,7 @@
  */
 
 // import config from './package.json' with { type: 'json' };
-import config from './package.json' assert { type: 'json' };
+// import config from './package.json' assert { type: 'json' };
 import { promisify } from 'node:util';
 import child_process from 'node:child_process';
 const exec = promisify(child_process.exec);
@@ -94,8 +94,8 @@ try {
 
 async function getDetails() {
 	const data = {
-		projectName: config.name,
-		serverName: `${config.name}.glitch.me`,
+		// projectName: config.name,
+		// serverName: `${config.name}.glitch.me`,
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
 		processorName,
