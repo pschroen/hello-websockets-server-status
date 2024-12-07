@@ -17,6 +17,8 @@ let memTotal;
 let memAvailable;
 let swapTotal;
 let swapFree;
+let storageTotal;
+let storageAvailable;
 let ipinfo;
 let serverUptime;
 let normalizedLoadAverage;
@@ -70,6 +72,15 @@ try {
 }
 
 try {
+	let storage = (await exec('df . | tail -1 | tr -s " " | cut -d " " -f 2,4')).stdout;
+	storage = storage.split(' ');
+	storageTotal = Number(storage[0]) / 1024 / 1024;
+	storageAvailable = Number(storage[1]) / 1024 / 1024;
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
 	ipinfo = (await exec('curl https://ipinfo.io/')).stdout;
 	ipinfo = JSON.parse(ipinfo);
 } catch (err) {
@@ -87,7 +98,9 @@ async function getDetails() {
 		memTotal,
 		memAvailable,
 		swapTotal,
-		swapFree
+		swapFree,
+		storageTotal,
+		storageAvailable
 	};
 
 	// console.log('DETAILS:', data);
