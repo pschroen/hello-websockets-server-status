@@ -88,7 +88,7 @@ try {
 
 async function getDetails() {
 	const data = {
-		packageName: process.env.npm_package_name,
+		packageVersion: `${process.env.npm_package_name}/${process.env.npm_package_version}`,
 		serverName: `${process.env.npm_package_name}.glitch.me`,
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node} (${osRelease})`,
