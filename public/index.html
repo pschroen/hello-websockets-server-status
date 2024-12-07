@@ -19,7 +19,9 @@
 </head>
 <body>
 	<script>
-		const latencyArray = []; // Used for calculating the average
+		// Used for calculating the averages
+		const latencyArray = [];
+		const loadArray = [];
 
 		const socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}`);
 
@@ -54,16 +56,32 @@
 				}
 				case 'server-status': {
 					const { status, latency } = message;
-					const [currentTime, serverUptime, normalizedLoadAverage] = status;
 
-					if (latency) {
-						latencyArray.push(latency);
+					if (status.length > 3) {
+						status.forEach(([currentTime, serverUptime, normalizedLoadAverage]) => {
+							if (normalizedLoadAverage !== null) {
+								loadArray.push(normalizedLoadAverage);
+							}
+						});
+					} else {
+						const [currentTime, serverUptime, normalizedLoadAverage] = status;
 
-						// https://stackoverflow.com/questions/10359907/how-to-compute-the-sum-and-average-of-elements-in-an-array/10624256#10624256
-						const avg = latencyArray.reduce((a, b) => a + b, 0) / latencyArray.length;
+						if (latency !== undefined) {
+							latencyArray.push(latency);
+						}
 
-						console.log('server-status', latencyArray, avg);
+						if (normalizedLoadAverage !== null) {
+							loadArray.push(normalizedLoadAverage);
+						}
 					}
+
+					console.log(
+						'server-status',
+						latencyArray,
+						latencyArray.reduce((a, b) => a + b, 0) / latencyArray.length,
+						loadArray,
+						loadArray.reduce((a, b) => a + b, 0) / loadArray.length
+					);
 					break;
 				}
 			}
