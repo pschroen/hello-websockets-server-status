@@ -32,7 +32,7 @@ try {
 }
 
 try {
-	processorName = (await exec('lscpu | sed -nr "/Model name/ s/.*:\\s*(.*)/\\1/p"')).stdout;
+	processorName = (await exec('lscpu | sed -nr "/Model name/ s/.*:\\s*(.*)/\\1/p" | tr -d "\\n"')).stdout;
 } catch (err) {
 	console.warn(err.stderr);
 }
