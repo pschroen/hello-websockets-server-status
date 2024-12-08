@@ -19,9 +19,8 @@
 </head>
 <body>
 	<script>
-		// Used for calculating the averages
+		// Used for calculating the average
 		const latencyArray = [];
-		const loadArray = [];
 
 		const socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}`);
 
@@ -30,7 +29,7 @@
 			const message = {
 				subscription: {
 					name: 'server-status',
-					time: 86400 // Past day in seconds (24 x 60 x 60)
+					time: 86400 // Past day in seconds
 				}
 			};
 
@@ -48,7 +47,7 @@
 					break;
 				case 'server-details': {
 					const {
-						packageVersion,
+						// packageVersion,
 						projectDomain,
 						networkName,
 						serverVersion,
@@ -62,36 +61,113 @@
 						storageAvailable
 					} = message;
 
+					const memUsed = memTotal - memFree;
+
+					let memUsedFormatted = memUsed / 1024 / 1024 / 1024;
+					memUsedFormatted = `${Math.round((memUsedFormatted + Number.EPSILON) * 100) / 100} GiB`;
+
+					let memTotalFormatted = memTotal / 1024 / 1024 / 1024;
+					memTotalFormatted = `${Math.round((memTotalFormatted + Number.EPSILON) * 100) / 100} GiB`;
+
+					let memUsedPercentage = (memUsed / memTotal) * 100;
+					memUsedPercentage = Math.round((memUsedPercentage + Number.EPSILON) * 100) / 100;
+
+					const swapUsed = swapTotal - swapFree;
+
+					let swapUsedFormatted = swapUsed / 1024 / 1024 / 1024;
+					swapUsedFormatted = `${Math.round((swapUsedFormatted + Number.EPSILON) * 100) / 100} GiB`;
+
+					let swapTotalFormatted = swapTotal / 1024 / 1024 / 1024;
+					swapTotalFormatted = `${Math.round((swapTotalFormatted + Number.EPSILON) * 100) / 100} GiB`;
+
+					let swapUsedPercentage = (swapUsed / swapTotal) * 100;
+					swapUsedPercentage = Math.round((swapUsedPercentage + Number.EPSILON) * 100) / 100;
+
+					const storageUsed = storageTotal - storageAvailable;
+
+					let storageUsedFormatted;
+					let storageTotalFormatted;
+
+					if (storageTotal < 1e9) {
+						storageUsedFormatted = storageUsed / 1000 / 1000;
+						storageUsedFormatted = `${Math.round((storageUsedFormatted + Number.EPSILON) * 100) / 100} MB`;
+
+						storageTotalFormatted = storageTotal / 1000 / 1000;
+						storageTotalFormatted = `${Math.round((storageTotalFormatted + Number.EPSILON) * 100) / 100} MB`;
+					} else {
+						storageUsedFormatted = storageUsed / 1000 / 1000 / 1000;
+						storageUsedFormatted = `${Math.round((storageUsedFormatted + Number.EPSILON) * 100) / 100} GB`;
+
+						storageTotalFormatted = storageTotal / 1000 / 1000 / 1000;
+						storageTotalFormatted = `${Math.round((storageTotalFormatted + Number.EPSILON) * 100) / 100} GB`;
+					}
+
+					let storageUsedPercentage = (storageUsed / storageTotal) * 100;
+					storageUsedPercentage = Math.round((storageUsedPercentage + Number.EPSILON) * 100) / 100;
+
+					console.log('details', {
+						projectDomain,
+						networkName,
+						serverVersion,
+						processorName,
+						numProcessingUnits,
+						memUsed: memUsedFormatted,
+						memTotal: memTotalFormatted,
+						memUsedPercentage,
+						swapUsed: swapUsedFormatted,
+						swapTotal: swapTotalFormatted,
+						swapUsedPercentage,
+						storageUsed: storageUsedFormatted,
+						storageTotal: storageTotalFormatted,
+						storageUsedPercentage
+					});
 					break;
 				}
 				case 'server-status': {
 					const { status, latency } = message;
 
-					if (status.length > 3) {
-						status.forEach(([currentTime, serverUptime, normalizedLoadAverage]) => {
-							if (normalizedLoadAverage !== null) {
-								loadArray.push(normalizedLoadAverage);
-							}
-						});
-					} else {
-						const [currentTime, serverUptime, normalizedLoadAverage] = status;
+					let data = status;
 
-						if (latency !== undefined) {
-							latencyArray.push(latency);
-						}
+					if (data.length > 3) {
+						// Separate last status update from array as new update
+						const last = data.pop();
 
-						if (normalizedLoadAverage !== null) {
-							loadArray.push(normalizedLoadAverage);
-						}
+						// Last 320 status updates for load average graph (160 + 160, ghost + array)
+						console.log('array', data.slice(-320).map(data => data[2] * 100)); // percentage
+
+						data = last;
 					}
 
-					console.log(
-						'server-status',
-						latencyArray,
-						latencyArray.reduce((a, b) => a + b, 0) / latencyArray.length,
-						loadArray,
-						loadArray.reduce((a, b) => a + b, 0) / loadArray.length
-					);
+					if (latency !== undefined) {
+						latencyArray.push(latency);
+					}
+
+					let serverUptime = data[1];
+
+					// https://stackoverflow.com/questions/36098913/convert-seconds-to-days-hours-minutes-and-seconds/52387803#52387803
+					const days = Math.floor(serverUptime / (3600 * 24));
+					const hours = Math.floor(serverUptime % (3600 * 24) / 3600);
+					const minutes = Math.floor(serverUptime % 3600 / 60);
+					const seconds = Math.floor(serverUptime % 60);
+
+					const daysFormatted = days > 0 ? days + (days === 1 ? ' day ' : ' days ') : '';
+					const hoursFormatted = hours > 0 ? hours + (hours === 1 ? ' hour ' : ' hours ') : '';
+					const minutesFormatted = minutes > 0 ? minutes + (minutes === 1 ? ' minute ' : ' minutes ') : '';
+					const secondsFormatted = seconds > 0 ? seconds + (seconds === 1 ? ' second' : ' seconds') : '';
+
+					serverUptime = daysFormatted + hoursFormatted + minutesFormatted + secondsFormatted;
+
+					let latencyAvg;
+
+					if (latencyArray.length) {
+						latencyAvg = latencyArray.reduce((a, b) => a + b, 0) / latencyArray.length;
+						latencyAvg = Math.round(latencyAvg);
+					}
+
+					let loadAvg = data[2] * 100; // percentage
+					loadAvg = Math.round(loadAvg);
+
+					console.log('status', { serverUptime, latency, latencyAvg, loadAvg });
 					break;
 				}
 			}
