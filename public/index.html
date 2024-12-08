@@ -46,6 +46,8 @@
 					socket.send(data);
 					break;
 				case 'server-details': {
+					const { details, latency } = message;
+
 					const {
 						// packageVersion,
 						projectDomain,
@@ -59,7 +61,7 @@
 						swapFree,
 						storageTotal,
 						storageAvailable
-					} = message;
+					} = details;
 
 					const memUsed = memTotal - memFree;
 
