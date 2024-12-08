@@ -152,7 +152,7 @@ async function getStatus() {
 		console.warn(err.stderr);
 	}
 
-	const data = [currentTime, serverUptime, normalizedLoadAverage];
+	const data = [serverUptime, normalizedLoadAverage];
 
 	// console.log('STATUS:', data);
 

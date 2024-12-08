@@ -68,13 +68,13 @@
 					const { status, latency } = message;
 
 					if (status.length > 3) {
-						status.forEach(([currentTime, serverUptime, normalizedLoadAverage]) => {
+						status.forEach(([serverUptime, normalizedLoadAverage]) => {
 							if (normalizedLoadAverage !== null) {
 								loadArray.push(normalizedLoadAverage);
 							}
 						});
 					} else {
-						const [currentTime, serverUptime, normalizedLoadAverage] = status;
+						const [serverUptime, normalizedLoadAverage] = status;
 
 						if (latency !== undefined) {
 							latencyArray.push(latency);
