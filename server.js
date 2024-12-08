@@ -12,13 +12,13 @@ const exec = promisify(child_process.exec);
 let osRelease;
 let processorName;
 let numProcessingUnits;
+let ipinfo;
 let memTotal;
 let memFree;
 let swapTotal;
 let swapFree;
 let storageTotal;
 let storageAvailable;
-let ipinfo;
 let serverUptime;
 let normalizedLoadAverage;
 
@@ -43,26 +43,6 @@ try {
 }
 
 try {
-	let free = (await exec('free -b | tail -2 | tr -s " " | cut -d " " -f 2,4')).stdout;
-	free = free.split('\n').map(stdout => stdout.split(' '));
-	memTotal = Number(free[0][0]);
-	memFree = Number(free[0][1]);
-	swapTotal = Number(free[1][0]);
-	swapFree = Number(free[1][1]);
-} catch (err) {
-	console.warn(err.stderr);
-}
-
-try {
-	let storage = (await exec('df -B1 . | tail -1 | tr -s " " | cut -d " " -f 2,4')).stdout;
-	storage = storage.split(' ');
-	storageTotal = Number(storage[0]);
-	storageAvailable = Number(storage[1]);
-} catch (err) {
-	console.warn(err.stderr);
-}
-
-try {
 	ipinfo = (await exec('curl https://ipinfo.io/')).stdout;
 	ipinfo = JSON.parse(ipinfo);
 } catch (err) {
@@ -70,6 +50,26 @@ try {
 }
 
 async function getDetails() {
+	try {
+		let free = (await exec('free -b | tail -2 | tr -s " " | cut -d " " -f 2,4')).stdout;
+		free = free.split('\n').map(stdout => stdout.split(' '));
+		memTotal = Number(free[0][0]);
+		memFree = Number(free[0][1]);
+		swapTotal = Number(free[1][0]);
+		swapFree = Number(free[1][1]);
+	} catch (err) {
+		console.warn(err.stderr);
+	}
+
+	try {
+		let storage = (await exec('df -B1 . | tail -1 | tr -s " " | cut -d " " -f 2,4')).stdout;
+		storage = storage.split(' ');
+		storageTotal = Number(storage[0]);
+		storageAvailable = Number(storage[1]);
+	} catch (err) {
+		console.warn(err.stderr);
+	}
+
 	const data = {
 		// packageVersion: `${process.env.npm_package_name}/${process.env.npm_package_version}`,
 		projectDomain: `${process.env.PROJECT_DOMAIN}.glitch.me`,
