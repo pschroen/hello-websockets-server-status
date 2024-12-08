@@ -13,7 +13,7 @@ let osRelease;
 let processorName;
 let numProcessingUnits;
 let memTotal;
-let memAvailable;
+let memFree;
 let swapTotal;
 let swapFree;
 let storageTotal;
@@ -43,29 +43,12 @@ try {
 }
 
 try {
-	memTotal = (await exec('sed -n "/^MemTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	memTotal = Number(memTotal) * 1024;
-} catch (err) {
-	console.warn(err.stderr);
-}
-
-try {
-	memAvailable = (await exec('sed -n "/^MemAvailable:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	memAvailable = Number(memAvailable) * 1024;
-} catch (err) {
-	console.warn(err.stderr);
-}
-
-try {
-	swapTotal = (await exec('sed -n "/^SwapTotal:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	swapTotal = Number(swapTotal) * 1024;
-} catch (err) {
-	console.warn(err.stderr);
-}
-
-try {
-	swapFree = (await exec('sed -n "/^SwapFree:/ s/[^0-9]//gp" /proc/meminfo')).stdout;
-	swapFree = Number(swapFree) * 1024;
+	let free = (await exec('free -b | tail -2 | tr -s " " | cut -d " " -f 2,4')).stdout;
+	free = free.split('\n').map(stdout => stdout.split(' '));
+	memTotal = Number(free[0][0]);
+	memFree = Number(free[0][1]);
+	swapTotal = Number(free[1][0]);
+	swapFree = Number(free[1][1]);
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -95,7 +78,7 @@ async function getDetails() {
 		processorName,
 		numProcessingUnits,
 		memTotal,
-		memAvailable,
+		memFree,
 		swapTotal,
 		swapFree,
 		storageTotal,
