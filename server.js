@@ -176,6 +176,23 @@ function remove(ws) {
 	}
 }
 
+async function details() {
+	const event = 'server-details';
+	const message = {
+		details: await getDetails()
+	};
+
+	for (let i = 0, l = clients.length; i < l; i++) {
+		const client = clients[i];
+
+		if (client._subscription === 'server-status' && client.readyState === client.OPEN) {
+			message.latency = client._latency;
+
+			client.send(JSON.stringify({ event, message }));
+		}
+	}
+}
+
 async function status() {
 	const event = 'server-status';
 	const message = {
@@ -185,7 +202,7 @@ async function status() {
 	for (let i = 0, l = clients.length; i < l; i++) {
 		const client = clients[i];
 
-		if (client._subscription === event && client.readyState === client.OPEN) {
+		if (client._subscription === 'server-status' && client.readyState === client.OPEN) {
 			message.latency = client._latency;
 
 			client.send(JSON.stringify({ event, message }));
@@ -229,11 +246,6 @@ app.ws('/', async (ws, request) => {
 		}
 	});
 
-	const event = 'server-details';
-	const message = serverDetails;
-
-	ws.send(JSON.stringify({ event, message }));
-
 	const heartbeat = () => {
 		if (ws.readyState === ws.OPEN) {
 			const event = 'heartbeat';
@@ -246,6 +258,7 @@ app.ws('/', async (ws, request) => {
 	};
 
 	heartbeat();
+	details();
 });
 
 //
