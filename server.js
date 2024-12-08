@@ -265,11 +265,19 @@ app.ws('/', async (ws, request) => {
 
 import { performance } from 'node:perf_hooks';
 
+const detailsInterval = 60000; // Update once per minute
+let lastDetails = 0;
+
 let startTime = 0;
 let timeout = null;
 
 async function onUpdate() {
 	startTime = performance.now();
+
+	if (startTime - lastDetails > detailsInterval) {
+		lastDetails = startTime;
+		await details();
+	}
 
 	await status();
 
