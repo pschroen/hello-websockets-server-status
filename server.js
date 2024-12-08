@@ -90,7 +90,7 @@ async function getDetails() {
 	return data;
 }
 
-const serverDetails = await getDetails();
+let serverDetails = await getDetails();
 console.log(serverDetails);
 
 //
@@ -177,9 +177,12 @@ function remove(ws) {
 }
 
 async function details() {
+	// Refresh cache
+	serverDetails = await getDetails();
+
 	const event = 'server-details';
 	const message = {
-		details: await getDetails()
+		details: serverDetails
 	};
 
 	for (let i = 0, l = clients.length; i < l; i++) {
@@ -246,6 +249,13 @@ app.ws('/', async (ws, request) => {
 		}
 	});
 
+	const event = 'server-details';
+	const message = {
+		details: serverDetails // Send cached details right away
+	};
+
+	ws.send(JSON.stringify({ event, message }));
+
 	const heartbeat = () => {
 		if (ws.readyState === ws.OPEN) {
 			const event = 'heartbeat';
@@ -258,7 +268,6 @@ app.ws('/', async (ws, request) => {
 	};
 
 	heartbeat();
-	details();
 });
 
 //
