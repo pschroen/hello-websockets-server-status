@@ -9,6 +9,8 @@ import { promisify } from 'node:util';
 import child_process from 'node:child_process';
 const exec = promisify(child_process.exec);
 
+const clients = [];
+
 let osRelease;
 let processorName;
 let numProcessingUnits;
@@ -82,7 +84,8 @@ async function getDetails() {
 		swapTotal,
 		swapFree,
 		storageTotal,
-		storageAvailable
+		storageAvailable,
+		numClients: clients.length
 	};
 
 	// console.log('DETAILS:', data);
@@ -116,8 +119,6 @@ expressWs.getWss('/');
 app.use(express.static('public'));
 
 //
-
-const clients = [];
 
 async function getAll(time) {
 	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {

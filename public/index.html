@@ -60,7 +60,8 @@
 						swapTotal,
 						swapFree,
 						storageTotal,
-						storageAvailable
+						storageAvailable,
+						numClients
 					} = details;
 
 					const memUsed = memTotal - memFree;
@@ -121,7 +122,8 @@
 						swapUsedPercentage,
 						storageUsed: storageUsedFormatted,
 						storageTotal: storageTotalFormatted,
-						storageUsedPercentage
+						storageUsedPercentage,
+						numClients
 					});
 					break;
 				}
