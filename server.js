@@ -73,18 +73,18 @@ async function getDetails() {
 	}
 
 	const data = {
-		// packageVersion: `${process.env.npm_package_name}/${process.env.npm_package_version}`,
-		projectDomain: `${process.env.PROJECT_DOMAIN}.glitch.me`,
+		packageVersion: process.env.npm_package_name && process.env.npm_package_version ? `${process.env.npm_package_name}/${process.env.npm_package_version}` : undefined,
+		projectDomain: process.env.PROJECT_DOMAIN ? `${process.env.PROJECT_DOMAIN}.glitch.me` : undefined,
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
-		serverVersion: `Node/${process.versions.node} (${osRelease})`,
-		processorName,
-		numProcessingUnits,
-		memTotal,
-		memFree,
-		swapTotal,
-		swapFree,
-		storageTotal,
-		storageAvailable,
+		serverVersion: `Node/${process.versions.node}${osRelease ? ` (${osRelease})` : ''}`,
+		memTotal: memTotal || undefined,
+		memFree: memFree || undefined,
+		swapTotal: swapTotal || undefined,
+		swapFree: swapFree || undefined,
+		storageTotal: storageTotal || undefined,
+		storageAvailable: storageAvailable || undefined,
+		processorName: processorName || undefined,
+		numProcessingUnits: numProcessingUnits || undefined,
 		numClients: clients.length
 	};
 
@@ -102,6 +102,20 @@ import db from './sqlite.js';
 
 await db.ready();
 
+async function getAll(time) {
+	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {
+		return [
+			time,
+			uptime,
+			loadavg !== null ? loadavg / 100 : null // Convert back to normalized load average in 0 to 1 range
+		];
+	});
+
+	// console.log('ALL:', twoDaysSeconds, data);
+
+	return data;
+}
+
 // Get the last ~20 status records (4 seconds x 20) = 80
 console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
 
@@ -117,22 +131,6 @@ const expressWs = enableWs(app);
 expressWs.getWss('/');
 
 app.use(express.static('public'));
-
-//
-
-async function getAll(time) {
-	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {
-		return [
-			time,
-			uptime,
-			loadavg !== null ? loadavg / 100 : null // Convert back to normalized load average in 0 to 1 range
-		];
-	});
-
-	// console.log('ALL:', twoDaysSeconds, data);
-
-	return data;
-}
 
 async function getStatus() {
 	const currentTime = Math.floor(Date.now() / 1000); // seconds
@@ -152,12 +150,20 @@ async function getStatus() {
 		console.warn(err.stderr);
 	}
 
-	const data = [currentTime, serverUptime, normalizedLoadAverage];
+	const data = [
+		currentTime,
+		serverUptime || undefined,
+		normalizedLoadAverage || undefined
+	];
 
 	// console.log('STATUS:', data);
 
 	// Store integers for time, uptime, and load average as percentage
-	await db.addStatus([currentTime, serverUptime, normalizedLoadAverage * 100]);
+	await db.addStatus([
+		currentTime,
+		serverUptime || null,
+		normalizedLoadAverage * 100 || null
+	]);
 
 	return data;
 }
