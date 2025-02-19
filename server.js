@@ -105,7 +105,7 @@ async function getAll(time) {
 	const data = (await db.getAll(time)).map(({ time, loadavg, clients }) => {
 		return [
 			time,
-			loadavg !== null ? loadavg / 100 : null, // Convert back to normalized load average in 0 to 1 range
+			loadavg / 100, // Convert back to normalized load average in 0 to 1 range
 			clients
 		];
 	});
@@ -151,7 +151,7 @@ async function getStatus() {
 
 	const data = [
 		currentTime,
-		normalizedLoadAverage || undefined,
+		normalizedLoadAverage || 0,
 		clients.length
 	];
 
@@ -160,7 +160,7 @@ async function getStatus() {
 	// Store integers for time, load average as percentage, and clients
 	await db.addStatus([
 		currentTime,
-		normalizedLoadAverage * 100 || null,
+		normalizedLoadAverage * 100,
 		clients.length
 	]);
 
