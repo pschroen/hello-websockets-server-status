@@ -19,7 +19,24 @@
 </head>
 <body>
 	<script>
-		// Used for calculating the average
+		// https://stackoverflow.com/questions/36098913/convert-seconds-to-days-hours-minutes-and-seconds/52387803#52387803
+		function formatSeconds(seconds) {
+			seconds = Number(seconds);
+
+			const d = Math.floor(seconds / 86400);
+			const h = Math.floor(seconds % 86400 / 3600);
+			const m = Math.floor(seconds % 3600 / 60);
+			const s = Math.floor(seconds % 60);
+
+			const daysFormatted = d > 0 ? `${d}${(d === 1 ? ' day ' : ' days ')}` : '';
+			const hoursFormatted = h > 0 ? `${h}${(h === 1 ? ' hour ' : ' hours ')}` : '';
+			const minutesFormatted = m > 0 ? `${m}${(m === 1 ? ' minute ' : ' minutes ')}` : '';
+			const secondsFormatted = `${s}${(s === 1 ? ' second' : ' seconds')}`;
+
+			return `${daysFormatted}${hoursFormatted}${minutesFormatted}${secondsFormatted}`;
+		}
+
+		// Latency average
 		const latencyArray = [];
 
 		const socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}`);
@@ -123,7 +140,7 @@
 						storageUsedPercentage,
 						processorName,
 						numProcessingUnits,
-						numClients
+						numClients: numClients > 0 ? numClients : 1
 					});
 					break;
 				}
@@ -132,12 +149,13 @@
 
 					let data = status;
 
+					// Initial data dump
 					if (data.length > 3) {
-						// Separate last status update from array as new update
+						// Separate last status update as new update
 						const last = data.pop();
 
-						// Last 320 status updates for load average graph (160 + 160, ghost + array)
-						console.log('array', data.slice(-320).map(data => data[2] * 100)); // percentage
+						// Last 240 status updates for load average
+						console.log('array', data.slice(-240).map(data => data[2] * 100)); // percentage
 
 						data = last;
 					}
@@ -146,20 +164,9 @@
 						latencyArray.push(latency);
 					}
 
-					let serverUptime = data[1];
-
-					// https://stackoverflow.com/questions/36098913/convert-seconds-to-days-hours-minutes-and-seconds/52387803#52387803
-					const days = Math.floor(serverUptime / (3600 * 24));
-					const hours = Math.floor(serverUptime % (3600 * 24) / 3600);
-					const minutes = Math.floor(serverUptime % 3600 / 60);
-					const seconds = Math.floor(serverUptime % 60);
-
-					const daysFormatted = days > 0 ? days + (days === 1 ? ' day ' : ' days ') : '';
-					const hoursFormatted = hours > 0 ? hours + (hours === 1 ? ' hour ' : ' hours ') : '';
-					const minutesFormatted = minutes > 0 ? minutes + (minutes === 1 ? ' minute ' : ' minutes ') : '';
-					const secondsFormatted = seconds > 0 ? seconds + (seconds === 1 ? ' second' : ' seconds') : '';
-
-					serverUptime = daysFormatted + hoursFormatted + minutesFormatted + secondsFormatted;
+					const currentTime = data[0]; // seconds
+					const serverUptime = data[1]; // seconds
+					const serverUptimeFormatted = formatSeconds(serverUptime);
 
 					let latencyAvg;
 
@@ -171,7 +178,14 @@
 					let loadAvg = data[2] * 100; // percentage
 					loadAvg = Math.round(loadAvg);
 
-					console.log('status', { serverUptime, latency, latencyAvg, loadAvg });
+					console.log('status', {
+						currentTime,
+						serverUptime,
+						serverUptimeFormatted,
+						latency,
+						latencyAvg,
+						loadAvg
+					});
 					break;
 				}
 			}
