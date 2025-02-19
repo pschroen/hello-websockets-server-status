@@ -28,7 +28,7 @@ open({
 
 	try {
 		if (!exists) {
-			await db.run('CREATE TABLE Status (id INTEGER PRIMARY KEY AUTOINCREMENT, time INTEGER, uptime INTEGER, loadavg INTEGER)');
+			await db.run('CREATE TABLE Status (id INTEGER PRIMARY KEY AUTOINCREMENT, time INTEGER, loadavg INTEGER, clients INTEGER)');
 		}
 		resolve();
 	} catch (err) {
@@ -46,7 +46,7 @@ export default {
 	},
 	addStatus: async status => {
 		try {
-			return await db.run('INSERT INTO Status (time, uptime, loadavg) VALUES (?, ?, ?)', status);
+			return await db.run('INSERT INTO Status (time, loadavg, clients) VALUES (?, ?, ?)', status);
 		} catch (err) {
 			console.error(err);
 		}

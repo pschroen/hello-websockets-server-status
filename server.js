@@ -84,8 +84,7 @@ async function getDetails() {
 		storageTotal: storageTotal || undefined,
 		storageAvailable: storageAvailable || undefined,
 		processorName: processorName || undefined,
-		numProcessingUnits: numProcessingUnits || undefined,
-		numClients: clients.length
+		numProcessingUnits: numProcessingUnits || undefined
 	};
 
 	// console.log('DETAILS:', data);
@@ -103,11 +102,11 @@ import db from './sqlite.js';
 await db.ready();
 
 async function getAll(time) {
-	const data = (await db.getAll(time)).map(({ time, uptime, loadavg }) => {
+	const data = (await db.getAll(time)).map(({ time, loadavg, clients }) => {
 		return [
 			time,
-			uptime,
-			loadavg !== null ? loadavg / 100 : null // Convert back to normalized load average in 0 to 1 range
+			loadavg !== null ? loadavg / 100 : null, // Convert back to normalized load average in 0 to 1 range
+			clients
 		];
 	});
 
@@ -152,17 +151,17 @@ async function getStatus() {
 
 	const data = [
 		currentTime,
-		serverUptime || undefined,
-		normalizedLoadAverage || undefined
+		normalizedLoadAverage || undefined,
+		clients.length
 	];
 
 	// console.log('STATUS:', data);
 
-	// Store integers for time, uptime, and load average as percentage
+	// Store integers for time, load average as percentage, and clients
 	await db.addStatus([
 		currentTime,
-		serverUptime || null,
-		normalizedLoadAverage * 100 || null
+		normalizedLoadAverage * 100 || null,
+		clients.length
 	]);
 
 	return data;
@@ -196,6 +195,7 @@ async function details() {
 		const client = clients[i];
 
 		if (client._subscription === 'server-status' && client.readyState === client.OPEN) {
+			message.serverUptime = serverUptime;
 			message.latency = client._latency;
 
 			client.send(JSON.stringify({ event, message }));
@@ -213,6 +213,7 @@ async function status() {
 		const client = clients[i];
 
 		if (client._subscription === 'server-status' && client.readyState === client.OPEN) {
+			message.serverUptime = serverUptime;
 			message.latency = client._latency;
 
 			client.send(JSON.stringify({ event, message }));

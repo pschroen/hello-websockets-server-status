@@ -63,10 +63,10 @@
 					socket.send(data);
 					break;
 				case 'server-details': {
-					const { details, latency } = message;
+					const { details, serverUptime, latency } = message;
 
 					const {
-						// packageVersion,
+						packageVersion,
 						projectDomain,
 						networkName,
 						serverVersion,
@@ -77,8 +77,7 @@
 						storageTotal,
 						storageAvailable,
 						processorName,
-						numProcessingUnits,
-						numClients
+						numProcessingUnits
 					} = details;
 
 					const memUsed = memTotal - memFree;
@@ -139,13 +138,12 @@
 						storageTotal: storageTotalFormatted,
 						storageUsedPercentage,
 						processorName,
-						numProcessingUnits,
-						numClients: numClients > 0 ? numClients : 1
+						numProcessingUnits
 					});
 					break;
 				}
 				case 'server-status': {
-					const { status, latency } = message;
+					const { status, serverUptime, latency } = message;
 
 					let data = status;
 
@@ -155,7 +153,7 @@
 						const last = data.pop();
 
 						// Last 240 status updates for load average
-						console.log('array', data.slice(-240).map(data => data[2] * 100)); // percentage
+						console.log('array', data.slice(-240).map(data => data[1] * 100)); // percentage
 
 						data = last;
 					}
@@ -165,7 +163,6 @@
 					}
 
 					const currentTime = data[0]; // seconds
-					const serverUptime = data[1]; // seconds
 					const serverUptimeFormatted = formatSeconds(serverUptime);
 
 					let latencyAvg;
@@ -175,8 +172,10 @@
 						latencyAvg = Math.round(latencyAvg);
 					}
 
-					let loadAvg = data[2] * 100; // percentage
+					let loadAvg = data[1] * 100; // percentage
 					loadAvg = Math.round(loadAvg);
+
+					const numClients = data[2];
 
 					console.log('status', {
 						currentTime,
@@ -184,7 +183,8 @@
 						serverUptimeFormatted,
 						latency,
 						latencyAvg,
-						loadAvg
+						loadAvg,
+						numClients
 					});
 					break;
 				}
