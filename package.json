@@ -27,9 +27,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "latest",
-    "express-ws": "latest",
-    "sqlite": "latest",
-    "sqlite3": "latest"
+    "express": "^4.21.2",
+    "express-ws": "^5.0.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   }
 }
