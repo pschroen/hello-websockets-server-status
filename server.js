@@ -52,6 +52,15 @@ try {
 }
 
 async function getDetails() {
+	const currentTime = Math.floor(Date.now() / 1000); // seconds
+
+	try {
+		serverUptime = (await exec('cat /proc/uptime')).stdout;
+		serverUptime = Number(serverUptime.split(' ')[0]);
+	} catch (err) {
+		console.warn(err.stderr);
+	}
+
 	try {
 		let free = (await exec('free -b | tail -2 | tr -s " " | cut -d " " -f 2,4')).stdout;
 		free = free.split('\n').map(stdout => stdout.split(' '));
@@ -77,6 +86,7 @@ async function getDetails() {
 		projectDomain: process.env.PROJECT_DOMAIN ? `${process.env.PROJECT_DOMAIN}.glitch.me` : undefined,
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node}${osRelease ? ` (${osRelease})` : ''}`,
+		restartTime: currentTime - serverUptime || undefined,
 		memTotal: memTotal || undefined,
 		memFree: memFree || undefined,
 		swapTotal: swapTotal || undefined,

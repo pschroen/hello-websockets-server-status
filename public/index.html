@@ -36,6 +36,17 @@
 			return `${daysFormatted}${hoursFormatted}${minutesFormatted}${secondsFormatted}`;
 		}
 
+		function formatDateTimeSeconds(seconds) {
+			seconds = Number(seconds);
+			return new Date(seconds * 1000).toLocaleString('default', {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: 'numeric'
+			});
+		}
+
 		// Latency average
 		const latencyArray = [];
 
@@ -70,6 +81,7 @@
 						projectDomain,
 						networkName,
 						serverVersion,
+						restartTime,
 						memTotal,
 						memFree,
 						swapTotal,
@@ -79,6 +91,8 @@
 						processorName,
 						numProcessingUnits
 					} = details;
+
+					const restartTimeFormatted = formatDateTimeSeconds(restartTime);
 
 					const memUsed = memTotal - memFree;
 
@@ -128,6 +142,7 @@
 						projectDomain,
 						networkName,
 						serverVersion,
+						restartTime: restartTimeFormatted,
 						memUsed: memUsedFormatted,
 						memTotal: memTotalFormatted,
 						memUsedPercentage,
