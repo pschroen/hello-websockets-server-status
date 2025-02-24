@@ -255,6 +255,7 @@ app.ws('/', async (ws, request) => {
 						const event = 'server-status';
 						const message = {
 							status: await getAll(Math.floor(Date.now() / 1000) - subscription.time),
+							serverUptime,
 							latency: ws._latency
 						};
 
