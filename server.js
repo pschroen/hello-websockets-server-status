@@ -269,7 +269,8 @@ app.ws('/', async (ws, request) => {
 
 	const event = 'server-details';
 	const message = {
-		details: serverDetails // Send cached details right away
+		details: serverDetails, // Send cached details right away
+		serverUptime
 	};
 
 	ws.send(JSON.stringify({ event, message }));

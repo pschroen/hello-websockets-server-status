@@ -93,6 +93,7 @@
 					} = details;
 
 					const restartTimeFormatted = formatDateTimeSeconds(restartTime);
+					const serverUptimeFormatted = formatSeconds(serverUptime);
 
 					const memUsed = memTotal - memFree;
 
@@ -143,6 +144,7 @@
 						networkName,
 						serverVersion,
 						restartTime: restartTimeFormatted,
+						serverUptime: serverUptimeFormatted,
 						memUsed: memUsedFormatted,
 						memTotal: memTotalFormatted,
 						memUsedPercentage,
@@ -194,8 +196,7 @@
 
 					console.log('status', {
 						currentTime,
-						serverUptime,
-						serverUptimeFormatted,
+						serverUptime: serverUptimeFormatted,
 						latency,
 						latencyAvg,
 						loadAvg,
