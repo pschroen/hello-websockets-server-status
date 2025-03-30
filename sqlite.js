@@ -37,16 +37,16 @@ open({
 });
 
 export default {
-	getAll: async time => {
+	addStatus: async array => {
 		try {
-			return await db.all('SELECT * from Status WHERE time >= ?', time);
+			return await db.run('INSERT INTO Status (time, loadavg, clients) VALUES (?, ?, ?)', array);
 		} catch (err) {
 			console.error(err);
 		}
 	},
-	addStatus: async status => {
+	getAll: async time => {
 		try {
-			return await db.run('INSERT INTO Status (time, loadavg, clients) VALUES (?, ?, ?)', status);
+			return await db.all('SELECT * from Status WHERE time >= ?', time);
 		} catch (err) {
 			console.error(err);
 		}

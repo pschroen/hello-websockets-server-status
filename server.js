@@ -112,7 +112,7 @@ import db from './sqlite.js';
 await db.ready();
 
 async function getAll(time) {
-	const data = (await db.getAll(time)).map(({ time, loadavg, clients }) => {
+	const array = (await db.getAll(time)).map(({ time, loadavg, clients }) => {
 		return [
 			time,
 			loadavg / 100, // Convert back to normalized load average in 0 to 1 range
@@ -120,9 +120,9 @@ async function getAll(time) {
 		];
 	});
 
-	// console.log('ALL:', twoDaysSeconds, data);
+	// console.log('ALL:', array);
 
-	return data;
+	return array;
 }
 
 // Get the last ~20 status records (4 seconds x 20) = 80
@@ -159,13 +159,13 @@ async function getStatus() {
 		console.warn(err.stderr);
 	}
 
-	const data = [
+	const array = [
 		currentTime,
 		normalizedLoadAverage || 0,
 		clients.length
 	];
 
-	// console.log('STATUS:', data);
+	// console.log('STATUS:', array);
 
 	// Store integers for time, load average as percentage, and clients
 	await db.addStatus([
@@ -174,7 +174,7 @@ async function getStatus() {
 		clients.length
 	]);
 
-	return data;
+	return array;
 }
 
 function add(ws, subscription) {
@@ -231,7 +231,7 @@ async function status() {
 	}
 }
 
-app.ws('/', async (ws, request) => {
+app.ws('/', async (ws, req) => {
 	ws.on('close', () => {
 		remove(ws);
 	});
