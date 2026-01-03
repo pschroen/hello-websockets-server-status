@@ -4,9 +4,11 @@
 
 import { promisify } from 'node:util';
 import child_process from 'node:child_process';
+import os from 'node:os';
 const exec = promisify(child_process.exec);
 
 let osRelease;
+let cpus;
 let processorName;
 let numProcessingUnits;
 let ipinfo;
@@ -27,14 +29,9 @@ try {
 }
 
 try {
-	processorName = (await exec('lscpu | sed -nr "/Model name/ s/.*:\\s*(.*)/\\1/p" | tr -d "\\n"')).stdout;
-} catch (err) {
-	console.warn(err.stderr);
-}
-
-try {
-	numProcessingUnits = (await exec('nproc --all')).stdout;
-	numProcessingUnits = Number(numProcessingUnits);
+	cpus = os.cpus();
+	processorName = cpus[0].model;
+	numProcessingUnits = cpus.length;
 } catch (err) {
 	console.warn(err.stderr);
 }
