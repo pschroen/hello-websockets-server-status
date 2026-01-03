@@ -11,6 +11,7 @@ let osRelease;
 let cpus;
 let processorName;
 let numProcessingUnits;
+let hostname;
 let ipinfo;
 let memTotal;
 let memFree;
@@ -32,6 +33,13 @@ try {
 	cpus = os.cpus();
 	processorName = cpus[0].model;
 	numProcessingUnits = cpus.length;
+} catch (err) {
+	console.warn(err.stderr);
+}
+
+try {
+	hostname = (await exec('hostname')).stdout;
+	hostname = hostname.split('\n')[0];
 } catch (err) {
 	console.warn(err.stderr);
 }
@@ -76,7 +84,7 @@ async function getDetails() {
 	const data = {
 		packageVersion: process.env.npm_package_name && process.env.npm_package_version ? `${process.env.npm_package_name}/${process.env.npm_package_version}` : undefined,
 		projectDomain: process.env.PROJECT_DOMAIN ? `${process.env.PROJECT_DOMAIN}.cyberspace.app` : undefined,
-		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
+		networkName: `${ipinfo.hostname || hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node}${osRelease ? ` (${osRelease})` : ''}`,
 		restartTime: currentTime - serverUptime || undefined,
 		memTotal: memTotal || undefined,
