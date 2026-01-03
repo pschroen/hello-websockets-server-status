@@ -20,7 +20,7 @@ let serverUptime;
 let normalizedLoadAverage;
 
 try {
-	osRelease = (await exec('cat /etc/issue')).stdout;
+	osRelease = (await exec('cat /etc/*-release | grep "PRETTY_NAME" | sed "s/PRETTY_NAME=//g" | sed "s/\\"//g"')).stdout;
 	osRelease = osRelease.split(' ')[0];
 } catch (err) {
 	console.warn(err.stderr);
