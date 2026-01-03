@@ -1,8 +1,5 @@
 /**
  * @author pschroen / https://ufo.ai/
- *
- * Remix of https://glitch.com/edit/#!/glitch-blank-sqlite
- * Remix of https://glitch.com/edit/#!/glitch-hello-sqlite
  */
 
 import fs from 'fs';

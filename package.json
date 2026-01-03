@@ -2,10 +2,10 @@
   "name": "hello-websockets-server-status",
   "version": "0.0.2",
   "description": "A simple status API endpoint built on Express, like the Apache status page.",
-  "homepage": "https://hello-websockets-server-status.glitch.me/",
+  "homepage": "https://hello-websockets-server-status.cyberspace.app/",
   "keywords": [
     "node",
-    "glitch",
+    "cyberspace",
     "express",
     "websockets",
     "sqlite",
@@ -15,7 +15,11 @@
   "author": "pschroen",
   "private": true,
   "repository": {
-    "url": "https://glitch.com/edit/#!/hello-websockets-server-status"
+    "type": "git",
+    "url": "https://github.com/pschroen/hello-websockets-server-status"
+  },
+  "bugs": {
+    "url": "https://github.com/pschroen/hello-websockets-server-status/issues"
   },
   "license": "ISC",
   "engines": {

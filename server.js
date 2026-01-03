@@ -1,8 +1,5 @@
 /**
  * @author pschroen / https://ufo.ai/
- *
- * Remix of https://glitch.com/edit/#!/hello-express
- * Remix of https://glitch.com/edit/#!/multiuser-sketchpad
  */
 
 import { promisify } from 'node:util';
@@ -81,7 +78,7 @@ async function getDetails() {
 
 	const data = {
 		packageVersion: process.env.npm_package_name && process.env.npm_package_version ? `${process.env.npm_package_name}/${process.env.npm_package_version}` : undefined,
-		projectDomain: process.env.PROJECT_DOMAIN ? `${process.env.PROJECT_DOMAIN}.glitch.me` : undefined,
+		projectDomain: process.env.PROJECT_DOMAIN ? `${process.env.PROJECT_DOMAIN}.cyberspace.app` : undefined,
 		networkName: `${ipinfo.hostname} (${ipinfo.ip})`,
 		serverVersion: `Node/${process.versions.node}${osRelease ? ` (${osRelease})` : ''}`,
 		restartTime: currentTime - serverUptime || undefined,

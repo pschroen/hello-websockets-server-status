@@ -2,7 +2,7 @@
 
 A server that serves a webpage, its resources, and some data.
 
-[https://hello-websockets-server-status.glitch.me/](https://hello-websockets-server-status.glitch.me/)
+[https://hello-websockets-server-status.cyberspace.app/](https://hello-websockets-server-status.cyberspace.app/)
 
 #### Dev notes
 
