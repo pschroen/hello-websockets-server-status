@@ -87,15 +87,15 @@ async function getDetails() {
 		networkName: `${ipinfo.hostname || hostname} (${ipinfo.ip})`,
 		networkOrg: ipinfo.org,
 		serverVersion: `Node/${process.versions.node}${osRelease ? ` (${osRelease})` : ''}`,
-		restartTime: currentTime - serverUptime || undefined,
-		memTotal: memTotal || undefined,
-		memFree: memFree || undefined,
-		swapTotal: swapTotal || undefined,
-		swapFree: swapFree || undefined,
-		storageTotal: storageTotal || undefined,
-		storageAvailable: storageAvailable || undefined,
-		processorName: processorName || undefined,
-		numProcessingUnits: numProcessingUnits || undefined
+		restartTime: currentTime - serverUptime,
+		memTotal: memTotal,
+		memFree: memFree,
+		swapTotal: swapTotal,
+		swapFree: swapFree,
+		storageTotal: storageTotal,
+		storageAvailable: storageAvailable,
+		processorName: processorName,
+		numProcessingUnits: numProcessingUnits
 	};
 
 	// console.log('DETAILS:', data);
