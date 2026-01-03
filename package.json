@@ -1,6 +1,6 @@
 {
   "name": "hello-websockets-server-status",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple status API endpoint built on Express, like the Apache status page.",
   "homepage": "https://hello-websockets-server-status.cyberspace.app/",
   "keywords": [
