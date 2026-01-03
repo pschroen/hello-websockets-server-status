@@ -19,34 +19,6 @@
 </head>
 <body>
 	<script>
-		// https://stackoverflow.com/questions/36098913/convert-seconds-to-days-hours-minutes-and-seconds/52387803#52387803
-		function formatSeconds(seconds) {
-			seconds = Number(seconds);
-
-			const d = Math.floor(seconds / 86400);
-			const h = Math.floor(seconds % 86400 / 3600);
-			const m = Math.floor(seconds % 3600 / 60);
-			const s = Math.floor(seconds % 60);
-
-			const daysFormatted = d > 0 ? `${d}${(d === 1 ? ' day ' : ' days ')}` : '';
-			const hoursFormatted = h > 0 ? `${h}${(h === 1 ? ' hour ' : ' hours ')}` : '';
-			const minutesFormatted = m > 0 ? `${m}${(m === 1 ? ' minute ' : ' minutes ')}` : '';
-			const secondsFormatted = `${s}${(s === 1 ? ' second' : ' seconds')}`;
-
-			return `${daysFormatted}${hoursFormatted}${minutesFormatted}${secondsFormatted}`;
-		}
-
-		function formatDateTimeSeconds(seconds) {
-			seconds = Number(seconds);
-			return new Date(seconds * 1000).toLocaleString('default', {
-				month: 'short',
-				day: 'numeric',
-				year: 'numeric',
-				hour: 'numeric',
-				minute: 'numeric'
-			});
-		}
-
 		// Latency average
 		const latencyArray = [];
 
@@ -56,7 +28,7 @@
 			const event = 'subscribe';
 			const message = {
 				subscription: {
-					name: 'server-status',
+					name: 'status',
 					time: 86400 // Past day in seconds
 				}
 			};
@@ -73,7 +45,7 @@
 				case 'heartbeat':
 					socket.send(data);
 					break;
-				case 'server-details': {
+				case 'details': {
 					const { details, serverUptime, latency } = message;
 
 					const {
@@ -159,7 +131,7 @@
 					});
 					break;
 				}
-				case 'server-status': {
+				case 'status': {
 					const { status, serverUptime, latency } = message;
 
 					let data = status;
@@ -206,6 +178,34 @@
 				}
 			}
 		});
+
+		// https://stackoverflow.com/questions/36098913/convert-seconds-to-days-hours-minutes-and-seconds/52387803#52387803
+		function formatSeconds(seconds) {
+			seconds = Number(seconds);
+
+			const d = Math.floor(seconds / 86400);
+			const h = Math.floor(seconds % 86400 / 3600);
+			const m = Math.floor(seconds % 3600 / 60);
+			const s = Math.floor(seconds % 60);
+
+			const daysFormatted = d > 0 ? `${d}${(d === 1 ? ' day ' : ' days ')}` : '';
+			const hoursFormatted = h > 0 ? `${h}${(h === 1 ? ' hour ' : ' hours ')}` : '';
+			const minutesFormatted = m > 0 ? `${m}${(m === 1 ? ' minute ' : ' minutes ')}` : '';
+			const secondsFormatted = `${s}${(s === 1 ? ' second' : ' seconds')}`;
+
+			return `${daysFormatted}${hoursFormatted}${minutesFormatted}${secondsFormatted}`;
+		}
+
+		function formatDateTimeSeconds(seconds) {
+			seconds = Number(seconds);
+			return new Date(seconds * 1000).toLocaleString('default', {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: 'numeric'
+			});
+		}
 	</script>
 </body>
 </html>

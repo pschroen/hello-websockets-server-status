@@ -9,8 +9,6 @@ import { promisify } from 'node:util';
 import child_process from 'node:child_process';
 const exec = promisify(child_process.exec);
 
-const clients = [];
-
 let osRelease;
 let processorName;
 let numProcessingUnits;
@@ -133,13 +131,100 @@ console.log(await getAll(Math.floor(Date.now() / 1000) - 80));
 import express from 'express';
 import enableWs from 'express-ws';
 
-const interval = 4000; // 4 second heartbeat
-
 const app = express();
+const port = process.env.PORT || 3000;
+
 const expressWs = enableWs(app);
 expressWs.getWss('/');
 
+const interval = 4000; // 4 second heartbeat
+const clients = [];
+
+//
+
 app.use(express.static('public'));
+
+//
+
+// Healthcheck endpoint
+app.get('/health', (req, res) => {
+	res.send('UP');
+});
+
+//
+
+app.ws('/', async (ws, req) => {
+	ws.on('close', () => {
+		remove(ws);
+	});
+
+	ws.on('message', async data => {
+		const { event, message } = JSON.parse(data);
+
+		switch (event) {
+			case 'heartbeat':
+				// console.log('HEARTBEAT:', message);
+				ws._latency = Date.now() - message;
+				break;
+			case 'subscribe': {
+				const { subscription } = message;
+				// console.log('SUBSCRIBE:', subscription);
+
+				add(ws, subscription.name);
+
+				switch (subscription.name) {
+					case 'status': {
+						const event = 'status';
+						const message = {
+							status: await getAll(Math.floor(Date.now() / 1000) - subscription.time),
+							serverUptime,
+							latency: ws._latency
+						};
+
+						ws.send(JSON.stringify({ event, message }));
+						break;
+					}
+				}
+				break;
+			}
+		}
+	});
+
+	const event = 'details';
+	const message = {
+		details: serverDetails, // Send cached details right away
+		serverUptime
+	};
+
+	ws.send(JSON.stringify({ event, message }));
+
+	const heartbeat = () => {
+		if (ws.readyState === ws.OPEN) {
+			const event = 'heartbeat';
+			const message = Date.now();
+
+			ws.send(JSON.stringify({ event, message }));
+
+			setTimeout(heartbeat, interval);
+		}
+	};
+
+	heartbeat();
+});
+
+//
+
+const server = app.listen(port, () => console.log(`Listening on port ${port}`));
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+	console.log('SIGTERM signal received: closing HTTP server');
+	server.close(() => {
+		console.log('HTTP server closed');
+	});
+});
+
+//
 
 async function getStatus() {
 	const currentTime = Math.floor(Date.now() / 1000); // seconds
@@ -196,7 +281,7 @@ async function details() {
 	// Refresh cache
 	serverDetails = await getDetails();
 
-	const event = 'server-details';
+	const event = 'details';
 	const message = {
 		details: serverDetails
 	};
@@ -204,7 +289,7 @@ async function details() {
 	for (let i = 0, l = clients.length; i < l; i++) {
 		const client = clients[i];
 
-		if (client._subscription === 'server-status' && client.readyState === client.OPEN) {
+		if (client._subscription === 'status' && client.readyState === client.OPEN) {
 			message.serverUptime = serverUptime;
 			message.latency = client._latency;
 
@@ -214,7 +299,7 @@ async function details() {
 }
 
 async function status() {
-	const event = 'server-status';
+	const event = 'status';
 	const message = {
 		status: await getStatus()
 	};
@@ -222,7 +307,7 @@ async function status() {
 	for (let i = 0, l = clients.length; i < l; i++) {
 		const client = clients[i];
 
-		if (client._subscription === 'server-status' && client.readyState === client.OPEN) {
+		if (client._subscription === 'status' && client.readyState === client.OPEN) {
 			message.serverUptime = serverUptime;
 			message.latency = client._latency;
 
@@ -230,65 +315,6 @@ async function status() {
 		}
 	}
 }
-
-app.ws('/', async (ws, req) => {
-	ws.on('close', () => {
-		remove(ws);
-	});
-
-	ws.on('message', async data => {
-		const { event, message } = JSON.parse(data);
-
-		switch (event) {
-			case 'heartbeat':
-				// console.log('HEARTBEAT:', message);
-				ws._latency = Date.now() - message;
-				break;
-			case 'subscribe': {
-				const { subscription } = message;
-				// console.log('SUBSCRIBE:', subscription);
-
-				add(ws, subscription.name);
-
-				switch (subscription.name) {
-					case 'server-status': {
-						const event = 'server-status';
-						const message = {
-							status: await getAll(Math.floor(Date.now() / 1000) - subscription.time),
-							serverUptime,
-							latency: ws._latency
-						};
-
-						ws.send(JSON.stringify({ event, message }));
-						break;
-					}
-				}
-				break;
-			}
-		}
-	});
-
-	const event = 'server-details';
-	const message = {
-		details: serverDetails, // Send cached details right away
-		serverUptime
-	};
-
-	ws.send(JSON.stringify({ event, message }));
-
-	const heartbeat = () => {
-		if (ws.readyState === ws.OPEN) {
-			const event = 'heartbeat';
-			const message = Date.now();
-
-			ws.send(JSON.stringify({ event, message }));
-
-			setTimeout(heartbeat, interval);
-		}
-	};
-
-	heartbeat();
-});
 
 //
 
@@ -322,9 +348,3 @@ timeout = setTimeout(onUpdate, 0);
 // Stop
 // clearTimeout(timeout);
 // timeout = null;
-
-//
-
-const listener = app.listen(process.env.PORT, () => {
-	console.log(`Your app is listening on port ${listener.address().port}`);
-});
