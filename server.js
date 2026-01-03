@@ -85,6 +85,7 @@ async function getDetails() {
 		packageVersion: process.env.npm_package_name && process.env.npm_package_version ? `${process.env.npm_package_name}/${process.env.npm_package_version}` : undefined,
 		projectDomain: process.env.PROJECT_DOMAIN ? `${process.env.PROJECT_DOMAIN}.cyberspace.app` : undefined,
 		networkName: `${ipinfo.hostname || hostname} (${ipinfo.ip})`,
+		networkOrg: ipinfo.org,
 		serverVersion: `Node/${process.versions.node}${osRelease ? ` (${osRelease})` : ''}`,
 		restartTime: currentTime - serverUptime || undefined,
 		memTotal: memTotal || undefined,
