@@ -22,9 +22,6 @@
     "url": "https://github.com/pschroen/hello-websockets-server-status/issues"
   },
   "license": "ISC",
-  "engines": {
-    "node": "16.x"
-  },
   "type": "module",
   "main": "server.js",
   "scripts": {
